@@ -425,26 +425,30 @@
   .obj-item {
     border-radius: 12px;
     border: 1px solid var(--border);
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     overflow: hidden;
     background: var(--surface);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     transition: box-shadow 0.15s, border-color 0.15s;
   }
-  .obj-item:hover {
+  .obj-item.open {
     border-color: #d97706;
     box-shadow: 0 4px 12px rgba(217,119,6,0.12);
   }
 
   .obj-q-row {
-    padding: 13px 14px 11px;
+    padding: 13px 14px 12px;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
-    background: #fffbeb;
-    border-bottom: 2px solid #fcd34d;
+    background: var(--surface);
+    cursor: pointer;
+    transition: background 0.12s;
+    user-select: none;
   }
+  .obj-q-row:hover { background: #fffbeb; }
+  .obj-item.open .obj-q-row { background: #fffbeb; border-bottom: 2px solid #fcd34d; }
 
   .obj-q {
     font-size: 13.5px;
@@ -452,9 +456,19 @@
     font-family: var(--sans);
     line-height: 1.5;
     font-weight: 600;
+    flex: 1;
   }
 
+  .obj-chevron {
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .obj-item.open .obj-chevron { transform: rotate(180deg); color: #d97706; }
+
   .obj-answer {
+    display: none;
     padding: 14px 16px 16px;
     background: var(--surface);
     font-size: 14px;
@@ -462,8 +476,9 @@
     color: var(--text-dim);
     white-space: pre-wrap;
     font-family: var(--sans);
-    position: relative;
+    animation: slideDown 0.18s ease;
   }
+  .obj-item.open .obj-answer { display: block; }
 
   .obj-copy-btn {
     flex-shrink: 0;
@@ -478,7 +493,6 @@
     letter-spacing: 0.04em;
     transition: all 0.15s;
     white-space: nowrap;
-    margin-top: 1px;
   }
   .obj-copy-btn:hover { background: #fcd34d; }
   .obj-copy-btn.copied { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
@@ -1425,13 +1439,25 @@ function buildObjList(objs) {
     return;
   }
   el.innerHTML = objs.map(o => `
-    <div class="obj-item">
-      <div class="obj-q-row">
+    <div class="obj-item" id="obj-${o.id}">
+      <div class="obj-q-row" onclick="toggleObj('${o.id}')">
         <span class="obj-q">"${escHtml(o.text)}"</span>
-        <button class="obj-copy-btn" onclick="copyResponse(this, '${o.id}')">Copy</button>
+        <span class="obj-chevron">▼</span>
       </div>
-      <div class="obj-answer" data-oid="${o.id}">${escHtml(o.response)}</div>
+      <div class="obj-answer" data-oid="${o.id}">
+        ${escHtml(o.response)}
+        <div style="margin-top:10px">
+          <button class="obj-copy-btn" onclick="copyResponse(this, '${o.id}')">Copy response</button>
+        </div>
+      </div>
     </div>`).join('');
+}
+
+function toggleObj(oid) {
+  const item   = document.getElementById('obj-' + oid);
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('#objList .obj-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
 }
 
 function copyResponse(btn, oid) {
