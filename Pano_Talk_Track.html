@@ -122,26 +122,21 @@
      SDR VIEW — TWO COLUMN LAYOUT
   ══════════════════════════════════════════ */
 
-  /* Product tab bar — below nav */
+  /* Product tabs — inline in nav */
   .product-bar {
-    background: #0d1b3e;
-    border-bottom: 2px solid rgba(255,255,255,0.08);
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    padding: 0 24px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    flex-shrink: 0;
-    height: var(--tabbar-h);
+    flex: 1;
+    min-width: 0;
   }
   .product-bar::-webkit-scrollbar { display: none; }
   .product-tab {
     padding: 0 22px;
     height: 38px;
     border: none;
-    border-bottom: 2px solid transparent;
     border-radius: 6px;
     background: rgba(255,255,255,0.06);
     color: rgba(255,255,255,0.45);
@@ -170,7 +165,7 @@
     display: grid;
     grid-template-columns: 1fr 360px;
     grid-template-rows: auto 1fr;
-    height: calc(100vh - var(--nav-h) - var(--tabbar-h));
+    height: calc(100vh - var(--nav-h));
     overflow: hidden;
   }
 
@@ -935,13 +930,14 @@
       <span class="sep">|</span>
       <span class="sub">Call Playbook</span>
     </div>
+    <div class="nav-divider"></div>
+    <div class="product-bar" id="productBar"></div>
   </div>
   <div class="nav-actions" id="navActions">
     <button class="btn-ghost" id="backBtn" onclick="showView('sdr')" style="display:none">← Cheat Sheet</button>
     <button class="btn-ghost" id="adminNavBtn" onclick="handleAdminNav()">Admin</button>
   </div>
 </nav>
-<div class="product-bar" id="productBar"></div>
 
 <!-- ═══════════ SDR VIEW ═══════════ -->
 <div id="view-sdr" class="view active">
