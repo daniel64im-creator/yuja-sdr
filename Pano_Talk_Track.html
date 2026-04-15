@@ -7,22 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f0f2f5;
+    --bg: #f0f4f8;
     --surface: #ffffff;
-    --surface2: #eef0f3;
-    --border: #d1d5db;
-    --accent: #1e7e34;
-    --accent-on-dark: #4cbe63;
-    --accent-dim: rgba(30,126,52,0.1);
-    --accent-dim2: rgba(30,126,52,0.06);
+    --surface2: #e8f5f4;
+    --border: #ccd8e0;
+    --accent: #00a99d;
+    --accent-on-dark: #2dcfc3;
+    --accent-dim: rgba(0,169,157,0.1);
+    --accent-dim2: rgba(0,169,157,0.06);
     --warn: #7a4400;
     --warn-bg: #fff8f0;
     --warn-dim: rgba(122,68,0,0.08);
     --danger: #b91c1c;
     --danger-dim: rgba(185,28,28,0.08);
-    --text: #111318;
-    --text-muted: #4a5568;
-    --text-dim: #374151;
+    --text: #0d1b3e;
+    --text-muted: #4a6080;
+    --text-dim: #2d4163;
     --nav-h: 54px;
     --bar-h: 58px;
     --radius: 8px;
@@ -43,7 +43,7 @@
 
   /* ── NAV ── */
   nav {
-    background: #1a1d23;
+    background: #0d1b3e;
     padding: 0 24px;
     height: var(--nav-h);
     display: flex;
@@ -106,8 +106,8 @@
 
   /* Product bar — sticky below nav */
   .product-bar {
-    background: #1a1d23;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    background: #0d1b3e;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     padding: 0 24px;
     height: var(--bar-h);
     display: flex;
@@ -138,7 +138,7 @@
   }
   .product-tab:hover { color: #e5e7eb; }
   .product-tab.active {
-    background: rgba(78,186,99,0.15);
+    background: rgba(0,169,157,0.15);
     border-color: var(--accent-on-dark);
     color: var(--accent-on-dark);
   }
@@ -193,7 +193,7 @@
     border-color: var(--accent);
     color: #ffffff;
     font-weight: 600;
-    box-shadow: 0 2px 6px rgba(30,126,52,0.25);
+    box-shadow: 0 2px 6px rgba(0,169,157,0.3);
   }
 
   /* Track cards */
@@ -319,7 +319,7 @@
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .obj-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(30,126,52,0.1); background: var(--surface); }
+  .obj-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,169,157,0.12); background: var(--surface); }
   .obj-search::placeholder { color: #9ca3af; }
 
   /* Objection list */
@@ -627,7 +627,7 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    background: #1a1d23;
+    background: #0d1b3e;
     color: #ffffff;
     font-family: var(--mono);
     font-size: 12px;
@@ -676,7 +676,7 @@
     flex-shrink: 0;
   }
   .ref-toggle-btn:hover { border-color: var(--accent-on-dark); color: var(--accent-on-dark); }
-  .ref-toggle-btn.active { background: rgba(78,186,99,0.15); border-color: var(--accent-on-dark); color: var(--accent-on-dark); }
+  .ref-toggle-btn.active { background: rgba(0,169,157,0.15); border-color: var(--accent-on-dark); color: var(--accent-on-dark); }
 
   .ref-panel {
     display: none;
