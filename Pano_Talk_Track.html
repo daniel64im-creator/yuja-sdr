@@ -1444,12 +1444,7 @@ function buildObjList(objs) {
         <span class="obj-q">"${escHtml(o.text)}"</span>
         <span class="obj-chevron">▼</span>
       </div>
-      <div class="obj-answer" data-oid="${o.id}">
-        ${escHtml(o.response)}
-        <div style="margin-top:10px">
-          <button class="obj-copy-btn" onclick="copyResponse(this, '${o.id}')">Copy response</button>
-        </div>
-      </div>
+      <div class="obj-answer" data-oid="${o.id}">${escHtml(o.response)}</div>
     </div>`).join('');
 }
 
