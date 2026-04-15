@@ -241,44 +241,42 @@
   }
 
   /* Track cards */
-  .track-section { margin-bottom: 32px; scroll-margin-top: 20px; }
-
-  .track-stage-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--sans);
-    font-size: 15px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  .track-stage-label::after {
-    content: '';
-    display: block;
-    width: 32px;
-    height: 2px;
-    border-radius: 2px;
-    opacity: 0.4;
-  }
+  .track-section { margin-bottom: 28px; scroll-margin-top: 20px; }
 
   .track-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 22px 24px 22px 28px;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     transition: box-shadow 0.15s;
+    overflow: hidden;
   }
   .track-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-  .track-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 18px; bottom: 18px;
-    width: 4px;
-    border-radius: 0 3px 3px 0;
+
+  .track-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .track-card-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .track-stage-label {
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .track-card-body {
+    padding: 20px 24px;
   }
   .track-text {
     font-size: 18px;
@@ -293,38 +291,33 @@
 
   /* ── Stage color themes (by order) ── */
   /* Green — stage 1 */
+  .stage-color-0 .track-card-header { background: #f0fdf4; border-bottom-color: #bbf7d0; }
+  .stage-color-0 .track-card-dot    { background: #22c55e; }
   .stage-color-0 .track-stage-label { color: #166534; }
-  .stage-color-0 .track-stage-label::after { background: #166534; }
-  .stage-color-0 .track-card { border-color: #bbf7d0; background: #f0fdf4; }
-  .stage-color-0 .track-card::before { background: #22c55e; }
-  .stage-color-0 .stage-tab.active { background: #22c55e; border-color: #22c55e; box-shadow: 0 2px 6px rgba(34,197,94,0.3); }
+  .stage-color-0 .stage-tab.active  { background: #22c55e; border-color: #22c55e; box-shadow: 0 2px 6px rgba(34,197,94,0.3); }
 
   /* Blue — stage 2 */
+  .stage-color-1 .track-card-header { background: #eff6ff; border-bottom-color: #bfdbfe; }
+  .stage-color-1 .track-card-dot    { background: #3b82f6; }
   .stage-color-1 .track-stage-label { color: #1e40af; }
-  .stage-color-1 .track-stage-label::after { background: #1e40af; }
-  .stage-color-1 .track-card { border-color: #bfdbfe; background: #eff6ff; }
-  .stage-color-1 .track-card::before { background: #3b82f6; }
-  .stage-color-1 .stage-tab.active { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 2px 6px rgba(59,130,246,0.3); }
+  .stage-color-1 .stage-tab.active  { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 2px 6px rgba(59,130,246,0.3); }
 
   /* Purple — stage 3 */
+  .stage-color-2 .track-card-header { background: #faf5ff; border-bottom-color: #e9d5ff; }
+  .stage-color-2 .track-card-dot    { background: #a855f7; }
   .stage-color-2 .track-stage-label { color: #6b21a8; }
-  .stage-color-2 .track-stage-label::after { background: #6b21a8; }
-  .stage-color-2 .track-card { border-color: #e9d5ff; background: #faf5ff; }
-  .stage-color-2 .track-card::before { background: #a855f7; }
-  .stage-color-2 .stage-tab.active { background: #a855f7; border-color: #a855f7; box-shadow: 0 2px 6px rgba(168,85,247,0.3); }
+  .stage-color-2 .stage-tab.active  { background: #a855f7; border-color: #a855f7; box-shadow: 0 2px 6px rgba(168,85,247,0.3); }
 
   /* Amber — stage 4 */
+  .stage-color-3 .track-card-header { background: #fffbeb; border-bottom-color: #fde68a; }
+  .stage-color-3 .track-card-dot    { background: #f59e0b; }
   .stage-color-3 .track-stage-label { color: #92400e; }
-  .stage-color-3 .track-stage-label::after { background: #92400e; }
-  .stage-color-3 .track-card { border-color: #fde68a; background: #fffbeb; }
-  .stage-color-3 .track-card::before { background: #f59e0b; }
-  .stage-color-3 .stage-tab.active { background: #f59e0b; border-color: #f59e0b; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
+  .stage-color-3 .stage-tab.active  { background: #f59e0b; border-color: #f59e0b; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
 
   /* Teal fallback — stage 5+ */
+  .stage-color-4 .track-card-header { background: var(--surface2); border-bottom-color: var(--border); }
+  .stage-color-4 .track-card-dot    { background: var(--accent); }
   .stage-color-4 .track-stage-label { color: var(--accent); }
-  .stage-color-4 .track-stage-label::after { background: var(--accent); }
-  .stage-color-4 .track-card { border-color: var(--border); background: var(--surface); }
-  .stage-color-4 .track-card::before { background: var(--accent); }
 
   /* ── PANEL MODE TOGGLE ── */
   .panel-mode-tabs {
@@ -1404,9 +1397,14 @@ function renderTrackPanel(pid) {
     const cc = stageColors[Math.min(i, stageColors.length - 1)];
     sectionsHtml += `
       <div class="track-section ${cc}" id="stage-${t.id}">
-        <div class="track-stage-label">${escHtml(t.title)}</div>
         <div class="track-card">
-          <div class="track-text">${escHtml(t.body)}</div>
+          <div class="track-card-header">
+            <div class="track-card-dot"></div>
+            <div class="track-stage-label">${escHtml(t.title)}</div>
+          </div>
+          <div class="track-card-body">
+            <div class="track-text">${escHtml(t.body)}</div>
+          </div>
         </div>
       </div>`;
   });
