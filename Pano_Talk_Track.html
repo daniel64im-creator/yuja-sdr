@@ -24,6 +24,7 @@
     --text-muted: #4a6080;
     --text-dim: #2d4163;
     --nav-h: 62px;
+    --tabbar-h: 46px;
     --bar-h: 0px;
     --radius: 8px;
     --mono: 'IBM Plex Mono', monospace;
@@ -121,27 +122,40 @@
      SDR VIEW — TWO COLUMN LAYOUT
   ══════════════════════════════════════════ */
 
-  /* Product tabs — now live inside nav */
+  /* Product tab bar — below nav */
+  .product-bar {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+  }
+  .product-bar::-webkit-scrollbar { display: none; }
   .product-tab {
-    padding: 6px 16px;
-    border-radius: 20px;
-    border: 1px solid transparent;
+    padding: 0 22px;
+    height: 44px;
+    border: none;
+    border-bottom: 3px solid transparent;
     background: none;
-    color: #9ca3af;
+    color: var(--text-muted);
     font-family: var(--sans);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    letter-spacing: 0;
     white-space: nowrap;
     transition: all 0.15s;
     flex-shrink: 0;
+    margin-bottom: -2px;
   }
-  .product-tab:hover { color: #e5e7eb; }
+  .product-tab:hover { color: var(--text); }
   .product-tab.active {
-    background: rgba(0,169,157,0.15);
-    border-color: var(--accent-on-dark);
-    color: var(--accent-on-dark);
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
   }
 
   /* Two-column body */
@@ -149,7 +163,7 @@
     display: grid;
     grid-template-columns: 1fr 360px;
     grid-template-rows: auto 1fr;
-    height: calc(100vh - var(--nav-h));
+    height: calc(100vh - var(--nav-h) - var(--tabbar-h));
     overflow: hidden;
   }
 
@@ -914,14 +928,13 @@
       <span class="sep">|</span>
       <span class="sub">Call Playbook</span>
     </div>
-    <div class="nav-divider"></div>
-    <div id="productBar" style="display:flex;align-items:center;gap:4px"></div>
   </div>
   <div class="nav-actions" id="navActions">
     <button class="btn-ghost" id="backBtn" onclick="showView('sdr')" style="display:none">← Cheat Sheet</button>
     <button class="btn-accent" id="adminNavBtn" onclick="handleAdminNav()">Admin</button>
   </div>
 </nav>
+<div class="product-bar" id="productBar"></div>
 
 <!-- ═══════════ SDR VIEW ═══════════ -->
 <div id="view-sdr" class="view active">
