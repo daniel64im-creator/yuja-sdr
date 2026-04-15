@@ -23,8 +23,8 @@
     --text: #0d1b3e;
     --text-muted: #4a6080;
     --text-dim: #2d4163;
-    --nav-h: 54px;
-    --bar-h: 58px;
+    --nav-h: 62px;
+    --bar-h: 0px;
     --radius: 8px;
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'Inter', sans-serif;
@@ -49,25 +49,43 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
     position: sticky;
     top: 0;
     z-index: 200;
     box-shadow: 0 1px 6px rgba(0,0,0,0.18);
   }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-left::-webkit-scrollbar { display: none; }
   .nav-brand {
     font-family: var(--sans);
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: #ffffff;
     display: flex;
     align-items: center;
-    gap: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .nav-brand .yu { color: #ffffff; }
   .nav-brand .ja { color: var(--accent-on-dark); }
-  .nav-brand .sep { color: #6b7280; margin: 0 10px; font-weight: 300; font-size: 18px; }
-  .nav-brand .sub { color: #d1d5db; font-size: 16px; font-weight: 500; font-family: var(--sans); letter-spacing: 0; }
-  .nav-actions { display: flex; gap: 8px; }
+  .nav-brand .sep { color: #4b5563; margin: 0 10px; font-weight: 300; font-size: 20px; }
+  .nav-brand .sub { color: #d1d5db; font-size: 17px; font-weight: 500; font-family: var(--sans); letter-spacing: 0; }
+  .nav-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+  .nav-actions { display: flex; gap: 8px; flex-shrink: 0; }
   .btn-ghost {
     background: none;
     border: 1px solid #6b7280;
@@ -104,25 +122,9 @@
      SDR VIEW — TWO COLUMN LAYOUT
   ══════════════════════════════════════════ */
 
-  /* Product bar — sticky below nav */
-  .product-bar {
-    background: #0d1b3e;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding: 0 24px;
-    height: var(--bar-h);
-    display: flex;
-    align-items: center;
-    gap: 0;
-    position: sticky;
-    top: var(--nav-h);
-    z-index: 150;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .product-bar::-webkit-scrollbar { display: none; }
-
+  /* Product tabs — now live inside nav */
   .product-tab {
-    padding: 7px 20px;
+    padding: 6px 16px;
     border-radius: 20px;
     border: 1px solid transparent;
     background: none;
@@ -148,7 +150,7 @@
     display: grid;
     grid-template-columns: 1fr 360px;
     grid-template-rows: auto 1fr;
-    height: calc(100vh - var(--nav-h) - var(--bar-h));
+    height: calc(100vh - var(--nav-h));
     overflow: hidden;
   }
 
@@ -895,10 +897,14 @@
 <body>
 
 <nav>
-  <div class="nav-brand">
-    <span class="yu">Yu</span><span class="ja">Ja</span>
-    <span class="sep">|</span>
-    <span class="sub">Call Playbook</span>
+  <div class="nav-left">
+    <div class="nav-brand">
+      <span class="yu">Yu</span><span class="ja">Ja</span>
+      <span class="sep">|</span>
+      <span class="sub">Call Playbook</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div id="productBar" style="display:flex;align-items:center;gap:4px"></div>
   </div>
   <div class="nav-actions" id="navActions">
     <button class="btn-ghost" id="backBtn" onclick="showView('sdr')" style="display:none">← Cheat Sheet</button>
@@ -908,11 +914,6 @@
 
 <!-- ═══════════ SDR VIEW ═══════════ -->
 <div id="view-sdr" class="view active">
-
-  <!-- Product bar -->
-  <div class="product-bar" id="productBar">
-    <div class="empty-state" style="padding:0;color:#6b7280;font-size:12px;font-family:var(--mono)">Loading…</div>
-  </div>
 
   <!-- Two-column body -->
   <div class="sdr-body">
