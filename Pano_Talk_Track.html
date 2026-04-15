@@ -7,22 +7,24 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f6f8;
+    --bg: #f0f2f5;
     --surface: #ffffff;
     --surface2: #eef0f3;
-    --border: #c8cdd6;
-    --accent: #1e7e34;        /* darkened green — 4.8:1 on white, WCAG AA */
-    --accent-on-dark: #4cbe63; /* lighter green for dark nav bg */
+    --border: #d1d5db;
+    --accent: #1e7e34;
+    --accent-on-dark: #4cbe63;
     --accent-dim: rgba(30,126,52,0.1);
     --accent-dim2: rgba(30,126,52,0.06);
-    --warn: #7a4400;           /* darkened amber — 7.2:1 on white */
-    --warn-bg: #fff3e0;
+    --warn: #7a4400;
+    --warn-bg: #fff8f0;
     --warn-dim: rgba(122,68,0,0.08);
-    --danger: #b91c1c;         /* darkened red — 5.9:1 on white */
+    --danger: #b91c1c;
     --danger-dim: rgba(185,28,28,0.08);
-    --text: #111318;           /* near-black — 17:1 on white */
-    --text-muted: #4a5568;     /* darkened — 7.0:1 on white, WCAG AA */
-    --text-dim: #374151;       /* darkened — 9.7:1 on white */
+    --text: #111318;
+    --text-muted: #4a5568;
+    --text-dim: #374151;
+    --nav-h: 54px;
+    --bar-h: 58px;
     --radius: 8px;
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'IBM Plex Sans', sans-serif;
@@ -42,24 +44,21 @@
   /* ── NAV ── */
   nav {
     background: #1a1d23;
-    border-bottom: none;
     padding: 0 24px;
-    height: 54px;
+    height: var(--nav-h);
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    z-index: 200;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.18);
   }
   .nav-brand {
     font-family: var(--sans);
     font-size: 16px;
     font-weight: 600;
     color: #ffffff;
-    letter-spacing: 0;
-    text-transform: none;
     display: flex;
     align-items: center;
     gap: 0;
@@ -101,54 +100,137 @@
   .view { display: none; }
   .view.active { display: block; }
 
-  /* ── SDR VIEW ── */
-  .sdr-wrap {
-    max-width: 820px;
-    margin: 0 auto;
-    padding: 32px 24px 80px;
-  }
+  /* ══════════════════════════════════════════
+     SDR VIEW — TWO COLUMN LAYOUT
+  ══════════════════════════════════════════ */
 
-  .product-selector {
+  /* Product bar — sticky below nav */
+  .product-bar {
+    background: #1a1d23;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0 24px;
+    height: var(--bar-h);
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
+    align-items: center;
+    gap: 0;
+    position: sticky;
+    top: var(--nav-h);
+    z-index: 150;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
+  .product-bar::-webkit-scrollbar { display: none; }
+
   .product-tab {
-    padding: 6px 16px;
+    padding: 6px 18px;
     border-radius: 20px;
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
     background: none;
-    color: var(--text-dim);
+    color: #9ca3af;
     font-family: var(--mono);
     font-size: 11px;
     cursor: pointer;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .product-tab:hover { color: #e5e7eb; }
+  .product-tab.active {
+    background: rgba(78,186,99,0.15);
+    border-color: var(--accent-on-dark);
+    color: var(--accent-on-dark);
+  }
+
+  /* Two-column body */
+  .sdr-body {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    grid-template-rows: auto 1fr;
+    height: calc(100vh - var(--nav-h) - var(--bar-h));
+    overflow: hidden;
+  }
+
+  /* ── LEFT: Talk Track ── */
+  .track-panel {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    overflow-y: auto;
+    padding: 24px 28px 60px;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .track-panel::-webkit-scrollbar { width: 5px; }
+  .track-panel::-webkit-scrollbar-track { background: transparent; }
+  .track-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Stage jump tabs */
+  .stage-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .stage-tab {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     transition: all 0.15s;
   }
-  .product-tab:hover { border-color: var(--accent); color: var(--accent); }
-  .product-tab.active {
+  .stage-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .stage-tab.active {
     background: var(--accent-dim);
     border-color: var(--accent);
     color: var(--accent);
+    font-weight: 600;
   }
 
-  .section-label {
+  /* Track cards */
+  .track-section { margin-bottom: 28px; scroll-margin-top: 20px; }
+
+  .track-stage-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
     margin-bottom: 10px;
+  }
+  .track-stage-label::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.35;
+  }
+
+  .track-title-row {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-family: var(--sans);
   }
 
   .track-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px 22px;
-    margin-bottom: 24px;
+    padding: 20px 22px 20px 26px;
     position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   .track-card::before {
     content: '';
@@ -159,106 +241,150 @@
     border-radius: 0 2px 2px 0;
   }
   .track-text {
-    font-size: 14px;
-    line-height: 1.75;
+    font-size: 15px;
+    line-height: 1.85;
     color: var(--text);
     white-space: pre-wrap;
   }
-  .track-text .highlight {
-    color: var(--accent);
-    font-weight: 500;
+  .track-text .hl { color: var(--accent); font-weight: 600; }
+
+  /* ── RIGHT: Objections panel ── */
+  .obj-panel {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow: hidden;
   }
 
-  .objections-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
+  .obj-panel-head {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface);
   }
-  .objections-label {
+
+  .obj-panel-title {
     font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 0.12em;
-    color: var(--text-muted);
     text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .pill-count {
+  .obj-count-pill {
     background: var(--surface2);
     border: 1px solid var(--border);
     color: var(--text-muted);
     font-family: var(--mono);
     font-size: 10px;
-    padding: 1px 7px;
+    padding: 1px 8px;
     border-radius: 10px;
   }
 
-  .objections-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  /* Search */
+  .obj-search-wrap {
+    position: relative;
   }
-
-  .obj-btn {
-    background: var(--surface);
+  .obj-search-wrap svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .obj-search {
+    width: 100%;
+    background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 11px 16px;
+    padding: 8px 12px 8px 32px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .obj-search:focus { border-color: var(--accent); background: var(--surface); }
+  .obj-search::placeholder { color: #9ca3af; }
+
+  /* Objection list */
+  .obj-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 10px 14px 24px;
+  }
+  .obj-list::-webkit-scrollbar { width: 4px; }
+  .obj-list::-webkit-scrollbar-track { background: transparent; }
+  .obj-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .obj-item {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .obj-item.open { border-color: #e6a817; }
+
+  .obj-btn {
+    width: 100%;
+    background: var(--surface);
+    border: none;
+    padding: 11px 14px;
     text-align: left;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.15s;
-    width: 100%;
+    align-items: flex-start;
+    gap: 8px;
+    transition: background 0.12s;
   }
-  .obj-btn:hover {
-    border-color: var(--warn);
-    background: var(--warn-bg);
-  }
-  .obj-btn.active {
-    border-color: var(--warn);
-    background: var(--warn-bg);
-  }
-  .obj-text {
-    font-size: 13px;
+  .obj-btn:hover { background: var(--warn-bg); }
+  .obj-item.open .obj-btn { background: var(--warn-bg); }
+
+  .obj-q {
+    font-size: 12.5px;
     color: var(--text);
     font-family: var(--mono);
+    line-height: 1.5;
   }
-  .obj-icon {
+  .obj-chevron {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 11px;
     flex-shrink: 0;
+    margin-top: 2px;
     transition: transform 0.2s;
   }
-  .obj-btn.active .obj-icon { transform: rotate(180deg); color: var(--warn); }
+  .obj-item.open .obj-chevron { transform: rotate(180deg); color: #e6a817; }
 
-  .obj-response {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-top: none;
-    border-radius: 0 0 var(--radius) var(--radius);
-    padding: 16px 18px;
-    font-size: 13.5px;
+  .obj-answer {
+    display: none;
+    padding: 12px 14px 14px;
+    background: #fffbf2;
+    border-top: 1px solid #fde68a;
+    font-size: 13px;
     line-height: 1.75;
     color: var(--text);
     white-space: pre-wrap;
+  }
+  .obj-item.open .obj-answer { display: block; }
+
+  .obj-no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 11px;
     display: none;
-    animation: slideDown 0.18s ease;
-  }
-  .obj-response.active { display: block; }
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
   }
 
-  .obj-wrapper { display: flex; flex-direction: column; }
-  .obj-wrapper .obj-btn.active {
-    border-radius: var(--radius) var(--radius) 0 0;
-    border-bottom-color: transparent;
-  }
-
+  /* ── EMPTY / LOADING ── */
   .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -267,13 +393,39 @@
     font-size: 12px;
   }
 
-  /* ── ADMIN VIEW ── */
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .sdr-body {
+      display: block;
+      height: auto;
+      overflow: visible;
+    }
+    .track-panel {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      overflow-y: visible;
+      padding: 20px 16px 32px;
+    }
+    .obj-panel {
+      display: block;
+      overflow: visible;
+    }
+    .obj-list {
+      overflow-y: visible;
+      max-height: none;
+    }
+    .obj-panel-head { padding: 14px 16px 12px; }
+    .obj-list { padding: 10px 12px 32px; }
+  }
+
+  /* ══════════════════════════════════════════
+     ADMIN VIEW (unchanged)
+  ══════════════════════════════════════════ */
   .admin-wrap {
     max-width: 900px;
     margin: 0 auto;
     padding: 32px 24px 80px;
   }
-
   .admin-tabs {
     display: flex;
     gap: 4px;
@@ -295,7 +447,6 @@
   }
   .admin-tab:hover { color: var(--text); }
   .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
   .admin-panel { display: none; }
   .admin-panel.active { display: block; }
 
@@ -339,18 +490,9 @@
     gap: 12px;
     margin-bottom: 8px;
   }
-  .card-title {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text);
-    flex: 1;
-  }
-  .card-meta {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
+  .card-title { font-family: var(--mono); font-size: 12px; color: var(--text); flex: 1; }
+  .card-meta { font-family: var(--mono); font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
   .btn-danger {
     background: var(--danger-dim);
     border: 1px solid var(--danger);
@@ -406,11 +548,7 @@
   }
   .btn-secondary:hover { border-color: var(--text-dim); }
 
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 24px 0;
-  }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 
   .section-title {
     font-family: var(--mono);
@@ -420,63 +558,6 @@
     text-transform: uppercase;
     margin-bottom: 14px;
   }
-
-  /* ── LOGIN ── */
-  .login-wrap {
-    max-width: 380px;
-    margin: 100px auto;
-    padding: 0 24px;
-  }
-  .login-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 32px 28px;
-  }
-  .login-title {
-    font-family: var(--mono);
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .login-sub {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 24px;
-  }
-  .error-msg {
-    background: var(--danger-dim);
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-family: var(--mono);
-    margin-bottom: 14px;
-    display: none;
-  }
-  .error-msg.visible { display: block; }
-
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--accent);
-    color: #ffffff;
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: var(--radius);
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.2s;
-    z-index: 999;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
 
   .inline-form {
     background: var(--surface2);
@@ -493,6 +574,57 @@
     letter-spacing: 0.08em;
     margin-bottom: 14px;
   }
+
+  /* ── LOGIN ── */
+  .login-wrap { max-width: 380px; margin: 100px auto; padding: 0 24px; }
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 28px;
+  }
+  .login-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+  .error-msg {
+    background: var(--danger-dim);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: var(--mono);
+    margin-bottom: 14px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1a1d23;
+    color: #ffffff;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    z-index: 999;
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
 
   .badge {
     display: inline-block;
@@ -511,23 +643,56 @@
 <body>
 
 <nav>
-  <div class="nav-brand"><span class="yu">Yu</span><span class="ja">Ja</span><span class="sep">|</span><span class="sub">SDR Cheat Sheet</span></div>
+  <div class="nav-brand">
+    <span class="yu">Yu</span><span class="ja">Ja</span>
+    <span class="sep">|</span>
+    <span class="sub">SDR Cheat Sheet</span>
+  </div>
   <div class="nav-actions" id="navActions">
-    <button class="btn-ghost" onclick="showView('sdr')">← Back to Cheat Sheet</button>
+    <button class="btn-ghost" id="backBtn" onclick="showView('sdr')" style="display:none">← Cheat Sheet</button>
     <button class="btn-accent" id="adminNavBtn" onclick="handleAdminNav()">Admin</button>
   </div>
 </nav>
 
-<!-- SDR VIEW -->
+<!-- ═══════════ SDR VIEW ═══════════ -->
 <div id="view-sdr" class="view active">
-  <div class="sdr-wrap">
-    <div class="section-label">Product Line</div>
-    <div class="product-selector" id="productSelector"></div>
-    <div id="sdrContent"></div>
+
+  <!-- Product bar -->
+  <div class="product-bar" id="productBar">
+    <div class="empty-state" style="padding:0;color:#6b7280;font-size:12px;font-family:var(--mono)">Loading…</div>
+  </div>
+
+  <!-- Two-column body -->
+  <div class="sdr-body">
+
+    <!-- LEFT: Talk Track -->
+    <div class="track-panel" id="trackPanel">
+      <div class="empty-state">Loading…</div>
+    </div>
+
+    <!-- RIGHT: Objections -->
+    <div class="obj-panel">
+      <div class="obj-panel-head">
+        <div class="obj-panel-title">
+          <span>Objection Handlers</span>
+          <span class="obj-count-pill" id="objCount">0</span>
+        </div>
+        <div class="obj-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="obj-search" id="objSearch" type="text" placeholder="Search objections…" oninput="filterObjs()">
+        </div>
+      </div>
+      <div class="obj-list" id="objList">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- ═══════════ ADMIN LOGIN ═══════════ -->
 <div id="view-login" class="view">
   <div class="login-wrap">
     <div class="login-card">
@@ -543,7 +708,7 @@
   </div>
 </div>
 
-<!-- ADMIN VIEW -->
+<!-- ═══════════ ADMIN VIEW ═══════════ -->
 <div id="view-admin" class="view">
   <div class="admin-wrap">
     <div class="admin-tabs">
@@ -582,12 +747,12 @@
           <select id="trackProduct"></select>
         </div>
         <div class="form-group">
-          <label>Talk Track Title</label>
-          <input type="text" id="trackTitle" placeholder="e.g. Cold Open — Gatekeeper">
+          <label>Stage Label (shown as section header)</label>
+          <input type="text" id="trackTitle" placeholder="e.g. OPENER — Cold Call">
         </div>
         <div class="form-group">
           <label>Script (exactly what to say)</label>
-          <textarea id="trackBody" rows="6" placeholder="Hi [Name], this is [Your Name] calling from YuJa..."></textarea>
+          <textarea id="trackBody" rows="6" placeholder="Hi [Name], this is [Your Name] calling from YuJa…"></textarea>
         </div>
         <input type="hidden" id="trackEditId">
         <div class="btn-row">
@@ -604,7 +769,7 @@
         <label>Filter by Product</label>
         <select id="objProductFilter" onchange="renderObjList()"></select>
       </div>
-      <div id="objList"></div>
+      <div id="objList-admin"></div>
       <div class="inline-form">
         <div class="form-title">+ Add / Edit Objection</div>
         <div class="form-group">
@@ -617,7 +782,7 @@
         </div>
         <div class="form-group">
           <label>Your Response / Guideline</label>
-          <textarea id="objResponse" rows="5" placeholder="Acknowledge + pivot: 'That makes sense — most teams I speak with feel the same way until they realize...'"></textarea>
+          <textarea id="objResponse" rows="5" placeholder="Acknowledge + pivot: 'That makes sense…'"></textarea>
         </div>
         <input type="hidden" id="objEditId">
         <div class="btn-row">
@@ -631,7 +796,7 @@
     <div id="panel-settings" class="admin-panel">
       <div class="section-title">Export & Import</div>
       <div class="card">
-        <p style="font-size:13px; color: var(--text-dim); margin-bottom:16px;">Export saves all your products, talk tracks, and objections to a <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px;">.json</code> file. Import loads it back in — use this to share content with your team or restore after a browser reset.</p>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">Export saves all your products, talk tracks, and objections to a <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px;">.json</code> file.</p>
         <div class="btn-row">
           <button class="btn-primary" onclick="exportData()">⬇ Export Content</button>
           <button class="btn-secondary" onclick="document.getElementById('importFile').click()">⬆ Import Content</button>
@@ -652,9 +817,9 @@
         <button class="btn-primary" onclick="changePassword()">Update Password</button>
       </div>
       <hr class="divider">
-      <div class="section-title" style="color: var(--danger)">Danger Zone</div>
-      <div class="card" style="border-color: var(--danger)">
-        <p style="font-size:13px; color: var(--text-muted); margin-bottom:14px;">This will delete ALL products, talk tracks, and objections. Cannot be undone.</p>
+      <div class="section-title" style="color:var(--danger)">Danger Zone</div>
+      <div class="card" style="border-color:var(--danger)">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">This will delete ALL products, talk tracks, and objections. Cannot be undone.</p>
         <button class="btn-danger" onclick="resetAll()">Reset All Data</button>
       </div>
     </div>
@@ -665,12 +830,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── SUPABASE CONFIG ───────────────────────────────────────
+// ── SUPABASE ──────────────────────────────────────────────
 const SUPABASE_URL = 'https://wvwcxmqyygtzxdnpfogu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_MFYGEU5tFKCZ23j7c3RARQ_5Rk2cSEs';
-const PASS_KEY = 'yuja_sdr_pass';
+const PASS_KEY     = 'yuja_sdr_pass';
 let isAdmin = false;
-let data = { products: [], tracks: [], objections: [] };
+let data    = { products: [], tracks: [], objections: [] };
+let activePid = null;
 
 async function db(table, method = 'GET', body = null, filter = '') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`, {
@@ -691,9 +857,9 @@ async function db(table, method = 'GET', body = null, filter = '') {
 async function loadData() {
   try {
     const [products, tracks, objections] = await Promise.all([
-      db('products', 'GET', null, '?order=sort_order'),
-      db('tracks',   'GET', null, '?order=sort_order'),
-      db('objections','GET', null, '?order=sort_order')
+      db('products',   'GET', null, '?order=sort_order'),
+      db('tracks',     'GET', null, '?order=sort_order'),
+      db('objections', 'GET', null, '?order=sort_order')
     ]);
     data.products   = products.map(p => ({ id: p.id, name: p.name }));
     data.tracks     = tracks.map(t => ({ id: t.id, productId: t.product_id, title: t.title, body: t.body }));
@@ -723,16 +889,18 @@ function escHtml(str) {
 function showView(v) {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.getElementById('view-' + v).classList.add('active');
-  const btn = document.getElementById('adminNavBtn');
+  const adminBtn = document.getElementById('adminNavBtn');
+  const backBtn  = document.getElementById('backBtn');
   if (v === 'admin') {
-    btn.textContent = 'Log Out';
-    document.querySelector('[onclick="showView(\'sdr\')"]').style.display = 'flex';
+    adminBtn.textContent = 'Log Out';
+    backBtn.style.display = 'flex';
   } else if (v === 'sdr') {
-    btn.textContent = isAdmin ? 'Admin Panel' : 'Admin';
-    document.querySelector('[onclick="showView(\'sdr\')"]').style.display = 'none';
+    adminBtn.textContent = isAdmin ? 'Admin Panel' : 'Admin';
+    backBtn.style.display = 'none';
     renderSDR();
   } else {
-    btn.textContent = isAdmin ? 'Admin Panel' : 'Admin';
+    adminBtn.textContent = isAdmin ? 'Admin Panel' : 'Admin';
+    backBtn.style.display = 'none';
   }
 }
 
@@ -777,81 +945,143 @@ async function resetAll() {
   } catch(e) { toast('Error resetting data'); }
 }
 
-// ── SDR RENDER ────────────────────────────────────────────
+// ══════════════════════════════════════════
+//  SDR RENDER
+// ══════════════════════════════════════════
 function renderSDR() {
-  const sel = document.getElementById('productSelector');
-  const content = document.getElementById('sdrContent');
-  sel.innerHTML = '';
+  const bar     = document.getElementById('productBar');
+  const trackEl = document.getElementById('trackPanel');
+  const objEl   = document.getElementById('objList');
+
+  bar.innerHTML = '';
 
   if (!data.products.length) {
-    content.innerHTML = '<div class="empty-state">No products configured yet.<br>Ask your admin to set up content.</div>';
+    bar.innerHTML = '<div style="color:#6b7280;font-size:12px;font-family:var(--mono);padding:0 4px">No products configured yet</div>';
+    trackEl.innerHTML = '<div class="empty-state">Ask your admin to set up content.</div>';
+    objEl.innerHTML   = '<div class="empty-state">No objections yet.</div>';
     return;
   }
 
-  function renderProduct(pid) {
-    sel.querySelectorAll('.product-tab').forEach(b => {
-      b.classList.toggle('active', b.dataset.pid === pid);
-    });
-    const tracks = data.tracks.filter(t => t.productId === pid);
-    const objs   = data.objections.filter(o => o.productId === pid);
-    let html = '';
-    if (tracks.length) {
-      tracks.forEach(t => {
-        html += `<div class="section-label" style="margin-bottom:10px">${escHtml(t.title)}</div>
-        <div class="track-card"><div class="track-text">${escHtml(t.body)}</div></div>`;
-      });
-    } else {
-      html += `<div class="track-card"><div class="track-text" style="color:var(--text-muted)">No talk track configured for this product yet.</div></div>`;
-    }
-    html += `<div class="objections-header">
-      <div class="objections-label">Objection Handlers</div>
-      <div class="pill-count">${objs.length}</div>
-    </div>`;
-    if (objs.length) {
-      html += `<div class="objections-grid">`;
-      objs.forEach(o => {
-        html += `<div class="obj-wrapper">
-          <button class="obj-btn" data-oid="${o.id}" onclick="toggleObj('${o.id}')">
-            <span class="obj-text">"${escHtml(o.text)}"</span>
-            <span class="obj-icon">▼</span>
-          </button>
-          <div class="obj-response" id="resp-${o.id}">${escHtml(o.response)}</div>
-        </div>`;
-      });
-      html += `</div>`;
-    } else {
-      html += `<div class="empty-state" style="padding:30px 0">No objections configured for this product.</div>`;
-    }
-    content.innerHTML = html;
-  }
-
+  // Build product tabs
   data.products.forEach((p, i) => {
     const btn = document.createElement('button');
-    btn.className = 'product-tab' + (i === 0 ? ' active' : '');
+    btn.className   = 'product-tab' + (i === 0 ? ' active' : '');
     btn.dataset.pid = p.id;
     btn.textContent = p.name;
-    btn.onclick = () => renderProduct(p.id);
-    sel.appendChild(btn);
+    btn.onclick     = () => switchProduct(p.id);
+    bar.appendChild(btn);
   });
 
-  renderProduct(data.products[0].id);
+  // Show first product
+  activePid = data.products[0].id;
+  renderTrackPanel(activePid);
+  renderObjPanel(activePid);
+}
+
+function switchProduct(pid) {
+  activePid = pid;
+  document.querySelectorAll('#productBar .product-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.pid === pid);
+  });
+  document.getElementById('objSearch').value = '';
+  renderTrackPanel(pid);
+  renderObjPanel(pid);
+}
+
+// ── Left panel: talk tracks ────────────────
+function renderTrackPanel(pid) {
+  const el     = document.getElementById('trackPanel');
+  const tracks = data.tracks.filter(t => t.productId === pid);
+
+  if (!tracks.length) {
+    el.innerHTML = '<div class="empty-state">No talk track configured for this product yet.</div>';
+    return;
+  }
+
+  // Build stage jump tabs from track titles
+  let stageTabsHtml = '<div class="stage-tabs">';
+  tracks.forEach((t, i) => {
+    const label = escHtml(t.title);
+    stageTabsHtml += `<button class="stage-tab${i===0?' active':''}" onclick="jumpStage('stage-${t.id}', this)">${label}</button>`;
+  });
+  stageTabsHtml += '</div>';
+
+  // Build track sections
+  let sectionsHtml = '';
+  tracks.forEach(t => {
+    sectionsHtml += `
+      <div class="track-section" id="stage-${t.id}">
+        <div class="track-stage-label">${escHtml(t.title)}</div>
+        <div class="track-card">
+          <div class="track-text">${escHtml(t.body)}</div>
+        </div>
+      </div>`;
+  });
+
+  el.innerHTML = stageTabsHtml + sectionsHtml;
+}
+
+function jumpStage(id, btn) {
+  // Update active tab
+  btn.closest('.stage-tabs').querySelectorAll('.stage-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Scroll section into view within the panel
+  const target = document.getElementById(id);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Right panel: objections ────────────────
+function renderObjPanel(pid) {
+  const objs = data.objections.filter(o => o.productId === pid);
+  document.getElementById('objCount').textContent = objs.length;
+  buildObjList(objs);
+}
+
+function buildObjList(objs) {
+  const el = document.getElementById('objList');
+  if (!objs.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:32px 12px">No objections configured for this product.</div>';
+    return;
+  }
+  el.innerHTML = objs.map(o => `
+    <div class="obj-item" id="obj-${o.id}">
+      <button class="obj-btn" onclick="toggleObj('${o.id}')">
+        <span class="obj-q">"${escHtml(o.text)}"</span>
+        <span class="obj-chevron">▼</span>
+      </button>
+      <div class="obj-answer">${escHtml(o.response)}</div>
+    </div>`).join('');
 }
 
 function toggleObj(oid) {
-  const btn  = document.querySelector(`.obj-btn[data-oid="${oid}"]`);
-  const resp = document.getElementById('resp-' + oid);
-  const isOpen = btn.classList.contains('active');
-  document.querySelectorAll('.obj-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.obj-response').forEach(r => r.classList.remove('active'));
-  if (!isOpen) { btn.classList.add('active'); resp.classList.add('active'); }
+  const item = document.getElementById('obj-' + oid);
+  const isOpen = item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('#objList .obj-item').forEach(i => i.classList.remove('open'));
+  // Toggle
+  if (!isOpen) item.classList.add('open');
 }
 
-// ── ADMIN RENDER ──────────────────────────────────────────
+function filterObjs() {
+  const q   = document.getElementById('objSearch').value.trim().toLowerCase();
+  const pid = activePid;
+  if (!pid) return;
+  const all = data.objections.filter(o => o.productId === pid);
+  const filtered = q
+    ? all.filter(o => o.text.toLowerCase().includes(q) || o.response.toLowerCase().includes(q))
+    : all;
+  buildObjList(filtered);
+  document.getElementById('objCount').textContent = filtered.length;
+}
+
+// ══════════════════════════════════════════
+//  ADMIN RENDER
+// ══════════════════════════════════════════
 function renderAdmin() {
   renderProductList();
   populateSelects();
   renderTrackList();
-  renderObjList();
+  renderAdminObjList();
 }
 
 function switchAdminTab(tab) {
@@ -912,8 +1142,8 @@ async function deleteProduct(pid) {
 
 // TRACKS
 function renderTrackList() {
-  const pid = document.getElementById('trackProductFilter').value;
-  const el  = document.getElementById('trackList');
+  const pid  = document.getElementById('trackProductFilter').value;
+  const el   = document.getElementById('trackList');
   const list = data.tracks.filter(t => t.productId === pid);
   if (!list.length) { el.innerHTML = '<div class="empty-state" style="padding:20px 0">No talk tracks for this product.</div>'; return; }
   el.innerHTML = list.map(t => `
@@ -952,10 +1182,10 @@ async function saveTrack() {
 function editTrack(tid) {
   const t = data.tracks.find(t => t.id === tid);
   if (!t) return;
-  document.getElementById('trackProduct').value = t.productId;
-  document.getElementById('trackTitle').value   = t.title;
-  document.getElementById('trackBody').value    = t.body;
-  document.getElementById('trackEditId').value  = tid;
+  document.getElementById('trackProduct').value  = t.productId;
+  document.getElementById('trackTitle').value    = t.title;
+  document.getElementById('trackBody').value     = t.body;
+  document.getElementById('trackEditId').value   = tid;
   document.querySelector('#panel-tracks .inline-form .form-title').textContent = '✏ Editing Talk Track';
 }
 function clearTrackForm() {
@@ -975,10 +1205,10 @@ async function deleteTrack(tid) {
   } catch(e) { toast('Error deleting track'); }
 }
 
-// OBJECTIONS
-function renderObjList() {
-  const pid = document.getElementById('objProductFilter').value;
-  const el  = document.getElementById('objList');
+// OBJECTIONS (admin list uses different element to avoid conflict with SDR panel)
+function renderAdminObjList() {
+  const pid  = document.getElementById('objProductFilter').value;
+  const el   = document.getElementById('objList-admin');
   const list = data.objections.filter(o => o.productId === pid);
   if (!list.length) { el.innerHTML = '<div class="empty-state" style="padding:20px 0">No objections for this product.</div>'; return; }
   el.innerHTML = list.map(o => `
@@ -995,6 +1225,9 @@ function renderObjList() {
       </div>
     </div>`).join('');
 }
+// Keep old name for filter dropdown
+function renderObjList() { renderAdminObjList(); }
+
 async function saveObj() {
   const pid  = document.getElementById('objProduct').value;
   const text = document.getElementById('objText').value.trim();
@@ -1009,7 +1242,7 @@ async function saveObj() {
     }
     await loadData();
     clearObjForm();
-    renderObjList();
+    renderAdminObjList();
     renderSDR();
     toast('Objection saved');
   } catch(e) { toast('Error saving objection'); }
@@ -1017,10 +1250,10 @@ async function saveObj() {
 function editObj(oid) {
   const o = data.objections.find(o => o.id === oid);
   if (!o) return;
-  document.getElementById('objProduct').value  = o.productId;
-  document.getElementById('objText').value     = o.text;
-  document.getElementById('objResponse').value = o.response;
-  document.getElementById('objEditId').value   = oid;
+  document.getElementById('objProduct').value   = o.productId;
+  document.getElementById('objText').value      = o.text;
+  document.getElementById('objResponse').value  = o.response;
+  document.getElementById('objEditId').value    = oid;
   document.querySelector('#panel-objections .inline-form .form-title').textContent = '✏ Editing Objection';
 }
 function clearObjForm() {
@@ -1034,15 +1267,41 @@ async function deleteObj(oid) {
   try {
     await db('objections', 'DELETE', null, `?id=eq.${oid}`);
     await loadData();
-    renderObjList();
+    renderAdminObjList();
     renderSDR();
     toast('Deleted');
   } catch(e) { toast('Error deleting objection'); }
 }
 
-// ── INIT ──────────────────────────────────────────────────
-document.querySelector('[onclick="showView(\'sdr\')"]').style.display = 'none';
-document.getElementById('sdrContent').innerHTML = '<div class="empty-state">Loading...</div>';
+// ── EXPORT / IMPORT ───────────────────────
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'yuja-sdr-content.json';
+  a.click();
+}
+async function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const raw = await file.text();
+    const imported = JSON.parse(raw);
+    if (!imported.products || !imported.tracks || !imported.objections) return toast('Invalid file format');
+    await db('objections', 'DELETE', null, '?id=neq.none');
+    await db('tracks',     'DELETE', null, '?id=neq.none');
+    await db('products',   'DELETE', null, '?id=neq.none');
+    for (const p of imported.products) await db('products',   'POST', { id: p.id, name: p.name, sort_order: 0 });
+    for (const t of imported.tracks)   await db('tracks',     'POST', { id: t.id, product_id: t.productId, title: t.title, body: t.body, sort_order: 0 });
+    for (const o of imported.objections) await db('objections', 'POST', { id: o.id, product_id: o.productId, text: o.text, response: o.response, sort_order: 0 });
+    await loadData();
+    renderAdmin();
+    renderSDR();
+    toast('Import complete');
+  } catch(err) { toast('Import failed — check file format'); }
+}
+
+// ── INIT ──────────────────────────────────
 loadData().then(() => renderSDR());
 </script>
 </body>
