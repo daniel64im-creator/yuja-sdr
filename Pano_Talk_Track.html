@@ -127,35 +127,40 @@
     background: #0d1b3e;
     border-bottom: 2px solid rgba(255,255,255,0.08);
     display: flex;
-    align-items: stretch;
-    gap: 0;
-    padding: 0 24px;
+    align-items: center;
+    gap: 4px;
+    padding: 0 16px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     flex-shrink: 0;
+    height: var(--tabbar-h);
   }
   .product-bar::-webkit-scrollbar { display: none; }
   .product-tab {
-    padding: 0 22px;
-    height: 44px;
+    padding: 0 18px;
+    height: 32px;
     border: none;
-    border-bottom: 3px solid transparent;
-    background: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
     color: rgba(255,255,255,0.45);
     font-family: var(--sans);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.15s;
     flex-shrink: 0;
-    margin-bottom: -2px;
     letter-spacing: 0.01em;
   }
-  .product-tab:hover { color: rgba(255,255,255,0.8); }
+  .product-tab:hover {
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.85);
+  }
   .product-tab.active {
-    color: #ffffff;
+    background: rgba(0,169,157,0.18);
     border-bottom-color: var(--accent-on-dark);
+    color: #ffffff;
     font-weight: 600;
   }
 
