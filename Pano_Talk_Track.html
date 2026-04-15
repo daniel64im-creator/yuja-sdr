@@ -1192,25 +1192,19 @@ function renderRefResults() {
     return;
   }
 
-  // Try to match active product — fall back to showing all if no match
   const activeProduct = data.products.find(p => p.id === activePid);
   const productName   = activeProduct ? activeProduct.name : '';
-  const hasMatch      = CUSTOMERS.some(c => c.state === state &&
-    c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase())));
 
-  const matches = CUSTOMERS.filter(c => {
-    if (c.state !== state) return false;
-    if (hasMatch) {
-      return c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase()));
-    }
-    return true; // fallback: show all customers in state
-  });
+  const matches = CUSTOMERS.filter(c =>
+    c.state === state &&
+    c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase()))
+  );
 
   badge.textContent   = matches.length + (matches.length === 1 ? ' customer' : ' customers');
   badge.style.display = matches.length ? 'inline-block' : 'none';
 
   if (!matches.length) {
-    resultsEl.innerHTML = '<div class="ref-no-results">No known customers in ' + escHtml(state) + '.</div>';
+    resultsEl.innerHTML = '<div class="ref-no-results">No known customers in ' + escHtml(state) + ' for this product.</div>';
     return;
   }
 
@@ -1219,7 +1213,7 @@ function renderRefResults() {
       <div class="ref-card-icon">🎓</div>
       <div>
         <div class="ref-card-name">${escHtml(c.name)}</div>
-        <div class="ref-card-state">${escHtml(c.state)} · ${c.products.map(p => `<span style="color:var(--accent);font-weight:600">${escHtml(p)}</span>`).join(', ')}</div>
+        <div class="ref-card-state">${escHtml(c.state)}</div>
       </div>
     </div>`).join('');
 }
