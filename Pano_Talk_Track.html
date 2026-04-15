@@ -66,17 +66,16 @@
   }
   .nav-left::-webkit-scrollbar { display: none; }
   .nav-brand {
-    font-family: var(--sans);
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
     display: flex;
     align-items: center;
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .nav-brand .yu { color: #ffffff; }
-  .nav-brand .ja { color: var(--accent-on-dark); }
+  .nav-brand img {
+    height: 36px;
+    width: auto;
+    display: block;
+  }
   .nav-brand .sep { color: #4b5563; margin: 0 10px; font-weight: 300; font-size: 20px; }
   .nav-brand .sub { color: #d1d5db; font-size: 17px; font-weight: 500; font-family: var(--sans); letter-spacing: 0; }
   .nav-divider {
@@ -900,7 +899,7 @@
 <nav>
   <div class="nav-left">
     <div class="nav-brand">
-      <span class="yu">Yu</span><span class="ja">Ja</span>
+      <img src="yuja_logo.jpg" alt="YuJa">
       <span class="sep">|</span>
       <span class="sub">Call Playbook</span>
     </div>
