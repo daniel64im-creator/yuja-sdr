@@ -1170,15 +1170,27 @@ function toggleRefPanel() {
 
 function populateRefStates() {
   const select = document.getElementById('refStateSelect');
-  // Keep only the placeholder, then rebuild
+  const activeProduct = data.products.find(p => p.id === activePid);
+  const productName   = activeProduct ? activeProduct.name : '';
+
+  // Only show states that have at least one customer for the active product
+  const relevantStates = [...new Set(
+    CUSTOMERS
+      .filter(c => c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase())))
+      .map(c => c.state)
+  )].sort();
+
   select.innerHTML = '<option value="">— pick a state —</option>';
-  const states = [...new Set(CUSTOMERS.map(c => c.state))].sort();
-  states.forEach(s => {
+  relevantStates.forEach(s => {
     const opt = document.createElement('option');
     opt.value = s;
     opt.textContent = s;
     select.appendChild(opt);
   });
+
+  // Clear results when states repopulate
+  document.getElementById('refResults').innerHTML = '';
+  document.getElementById('refCountBadge').style.display = 'none';
 }
 
 function renderRefResults() {
@@ -1226,8 +1238,10 @@ function switchProduct(pid) {
   document.getElementById('objSearch').value = '';
   renderTrackPanel(pid);
   renderObjPanel(pid);
-  // Re-run ref results if panel is open so results update for new product
+  // Re-run ref panel if open so dropdown and results update for new product
   if (document.getElementById('refPanel').classList.contains('open')) {
+    populateRefStates();
+    document.getElementById('refStateSelect').value = '';
     renderRefResults();
   }
 }
