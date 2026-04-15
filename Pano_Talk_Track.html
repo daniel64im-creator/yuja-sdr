@@ -932,16 +932,14 @@
 
       <!-- Mode toggle -->
       <div class="panel-mode-tabs">
-        <button class="panel-mode-tab active" id="modeTabObj" onclick="switchPanelMode('objections')">Objection Handlers</button>
+        <button class="panel-mode-tab active" id="modeTabObj" onclick="switchPanelMode('objections')">Objection Handlers <span id="objCount" style="background:rgba(0,0,0,0.12);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:600;margin-left:4px">0</span></button>
         <button class="panel-mode-tab" id="modeTabRef" onclick="switchPanelMode('references')">Customer References</button>
       </div>
 
       <!-- OBJECTIONS MODE -->
       <div id="modeObj" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
         <div class="obj-panel-head">
-          <div class="obj-panel-title">
-            <span class="obj-count-pill" id="objCount">0</span>
-          </div>
+          <div class="obj-panel-title"></div>
           <div class="obj-search-wrap">
             <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#4a6080" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
