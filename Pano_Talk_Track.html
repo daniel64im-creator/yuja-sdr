@@ -840,13 +840,14 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 10px 14px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     gap: 10px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    animation: slideDown 0.15s ease;
+    margin-bottom: 6px;
   }
+  .ref-card:last-child { margin-bottom: 0; }
 
   .ref-card-icon {
     width: 28px;
@@ -953,19 +954,9 @@
       </div>
 
       <!-- CUSTOMER REFERENCES MODE -->
-      <div id="modeRef" style="display:none; display:none; flex-direction:column; flex:1; overflow:hidden;">
-        <div class="obj-panel-head">
-          <div class="obj-panel-title">
-            <span class="obj-count-pill" id="refCountPill" style="display:none"></span>
-          </div>
-          <div class="ref-state-wrap">
-            <select class="ref-state-select" id="refStateSelect" onchange="renderRefResults()">
-              <option value="">— pick a state —</option>
-            </select>
-          </div>
-        </div>
-        <div class="obj-list" id="refResultsList">
-          <div class="empty-state" style="padding:32px 12px;font-size:11px">Pick a state to see customers.</div>
+      <div id="modeRef" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div class="obj-list" id="refStateList">
+          <div class="empty-state" style="padding:32px 12px;font-size:11px">Loading…</div>
         </div>
       </div>
 
@@ -1308,65 +1299,49 @@ function switchPanelMode(mode) {
 }
 
 function populateRefStates() {
-  const select = document.getElementById('refStateSelect');
+  const el = document.getElementById('refStateList');
   const activeProduct = data.products.find(p => p.id === activePid);
   const productName   = activeProduct ? activeProduct.name : '';
 
-  // Only show states that have at least one customer for the active product
-  const relevantStates = [...new Set(
-    CUSTOMERS
-      .filter(c => c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase())))
-      .map(c => c.state)
-  )].sort();
+  // Group customers by state, filtered to active product
+  const stateMap = {};
+  CUSTOMERS
+    .filter(c => c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase())))
+    .forEach(c => {
+      if (!stateMap[c.state]) stateMap[c.state] = [];
+      stateMap[c.state].push(c);
+    });
 
-  select.innerHTML = '<option value="">— pick a state —</option>';
-  relevantStates.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s;
-    opt.textContent = s;
-    select.appendChild(opt);
-  });
+  const states = Object.keys(stateMap).sort();
 
-  // Clear results when states repopulate
-  document.getElementById('refResults').innerHTML = '';
-  document.getElementById('refCountBadge').style.display = 'none';
+  if (!states.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:32px 12px;font-size:11px">No customer references for this product.</div>';
+    return;
+  }
+
+  el.innerHTML = states.map(state => {
+    const customers = stateMap[state];
+    const customersHtml = customers.map(c => `
+      <div class="ref-card">
+        <div class="ref-card-icon">🎓</div>
+        <div class="ref-card-name">${escHtml(c.name)}</div>
+      </div>`).join('');
+    return `
+      <div class="obj-item" id="ref-state-${state.replace(/[^a-z0-9]/gi,'_')}">
+        <div class="obj-q-row" onclick="toggleRefState(this)">
+          <span class="obj-q">${escHtml(state)}</span>
+          <span class="obj-chevron">▼</span>
+        </div>
+        <div class="obj-answer">${customersHtml}</div>
+      </div>`;
+  }).join('');
 }
 
-function renderRefResults() {
-  const state     = document.getElementById('refStateSelect').value;
-  const resultsEl = document.getElementById('refResultsList');
-  const pill      = document.getElementById('refCountPill');
-
-  if (!state) {
-    resultsEl.innerHTML = '<div class="empty-state" style="padding:32px 12px;font-size:11px">Pick a state to see customers.</div>';
-    pill.style.display = 'none';
-    return;
-  }
-
-  const activeProduct = data.products.find(p => p.id === activePid);
-  const productName   = activeProduct ? activeProduct.name : '';
-
-  const matches = CUSTOMERS.filter(c =>
-    c.state === state &&
-    c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase()))
-  );
-
-  pill.textContent   = matches.length;
-  pill.style.display = matches.length ? 'inline-block' : 'none';
-
-  if (!matches.length) {
-    resultsEl.innerHTML = '<div class="ref-no-results" style="padding:16px">No known customers in ' + escHtml(state) + ' for this product.</div>';
-    return;
-  }
-
-  resultsEl.innerHTML = matches.map(c => `
-    <div class="ref-card">
-      <div class="ref-card-icon">🎓</div>
-      <div>
-        <div class="ref-card-name">${escHtml(c.name)}</div>
-        <div class="ref-card-state">${escHtml(c.state)}</div>
-      </div>
-    </div>`).join('');
+function toggleRefState(row) {
+  const item   = row.closest('.obj-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('#refStateList .obj-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
 }
 
 function switchProduct(pid) {
@@ -1380,8 +1355,6 @@ function switchProduct(pid) {
   // Refresh ref panel if it's the active mode
   if (document.getElementById('modeTabRef').classList.contains('active')) {
     populateRefStates();
-    document.getElementById('refStateSelect').value = '';
-    renderRefResults();
   }
 }
 
