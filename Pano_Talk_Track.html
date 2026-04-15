@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SDR Cheat Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #f0f2f5;
@@ -27,7 +27,7 @@
     --bar-h: 58px;
     --radius: 8px;
     --mono: 'IBM Plex Mono', monospace;
-    --sans: 'IBM Plex Sans', sans-serif;
+    --sans: 'Inter', sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -241,10 +241,13 @@
     border-radius: 0 2px 2px 0;
   }
   .track-text {
-    font-size: 15px;
-    line-height: 1.85;
+    font-size: 16.5px;
+    line-height: 2;
     color: var(--text);
     white-space: pre-wrap;
+    font-family: var(--sans);
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
   .track-text .hl { color: var(--accent); font-weight: 600; }
 
@@ -326,54 +329,62 @@
   .obj-item {
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     overflow: hidden;
-    transition: border-color 0.15s;
-  }
-  .obj-item.open { border-color: #e6a817; }
-
-  .obj-btn {
-    width: 100%;
     background: var(--surface);
-    border: none;
-    padding: 11px 14px;
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-    transition: background 0.12s;
+    transition: box-shadow 0.15s, border-color 0.15s;
   }
-  .obj-btn:hover { background: var(--warn-bg); }
-  .obj-item.open .obj-btn { background: var(--warn-bg); }
+  .obj-item:hover {
+    border-color: #e6a817;
+    box-shadow: 0 2px 8px rgba(230,168,23,0.1);
+  }
+
+  .obj-q-row {
+    padding: 12px 14px 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    background: #fffdf5;
+    border-bottom: 1px solid #fde68a;
+  }
 
   .obj-q {
     font-size: 12.5px;
     color: var(--text);
     font-family: var(--mono);
-    line-height: 1.5;
+    line-height: 1.55;
+    font-weight: 600;
   }
-  .obj-chevron {
-    color: var(--text-muted);
-    font-size: 11px;
-    flex-shrink: 0;
-    margin-top: 2px;
-    transition: transform 0.2s;
-  }
-  .obj-item.open .obj-chevron { transform: rotate(180deg); color: #e6a817; }
 
   .obj-answer {
-    display: none;
     padding: 12px 14px 14px;
-    background: #fffbf2;
-    border-top: 1px solid #fde68a;
-    font-size: 13px;
-    line-height: 1.75;
-    color: var(--text);
+    background: var(--surface);
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: var(--text-dim);
     white-space: pre-wrap;
+    font-family: var(--sans);
+    position: relative;
   }
-  .obj-item.open .obj-answer { display: block; }
+
+  .obj-copy-btn {
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid #fde68a;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #92600a;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.15s;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .obj-copy-btn:hover { background: #fde68a; }
+  .obj-copy-btn.copied { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
   .obj-no-results {
     text-align: center;
@@ -381,7 +392,6 @@
     color: var(--text-muted);
     font-family: var(--mono);
     font-size: 11px;
-    display: none;
   }
 
   /* ── EMPTY / LOADING ── */
@@ -1040,26 +1050,30 @@ function renderObjPanel(pid) {
 function buildObjList(objs) {
   const el = document.getElementById('objList');
   if (!objs.length) {
-    el.innerHTML = '<div class="empty-state" style="padding:32px 12px">No objections configured for this product.</div>';
+    const isSearch = document.getElementById('objSearch').value.trim().length > 0;
+    el.innerHTML = isSearch
+      ? '<div class="obj-no-results">No objections match your search.</div>'
+      : '<div class="empty-state" style="padding:32px 12px">No objections configured for this product.</div>';
     return;
   }
   el.innerHTML = objs.map(o => `
-    <div class="obj-item" id="obj-${o.id}">
-      <button class="obj-btn" onclick="toggleObj('${o.id}')">
+    <div class="obj-item">
+      <div class="obj-q-row">
         <span class="obj-q">"${escHtml(o.text)}"</span>
-        <span class="obj-chevron">▼</span>
-      </button>
-      <div class="obj-answer">${escHtml(o.response)}</div>
+        <button class="obj-copy-btn" onclick="copyResponse(this, '${o.id}')">Copy</button>
+      </div>
+      <div class="obj-answer" data-oid="${o.id}">${escHtml(o.response)}</div>
     </div>`).join('');
 }
 
-function toggleObj(oid) {
-  const item = document.getElementById('obj-' + oid);
-  const isOpen = item.classList.contains('open');
-  // Close all
-  document.querySelectorAll('#objList .obj-item').forEach(i => i.classList.remove('open'));
-  // Toggle
-  if (!isOpen) item.classList.add('open');
+function copyResponse(btn, oid) {
+  const answerEl = document.querySelector(`.obj-answer[data-oid="${oid}"]`);
+  if (!answerEl) return;
+  navigator.clipboard.writeText(answerEl.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
 }
 
 function filterObjs() {
