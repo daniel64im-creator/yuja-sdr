@@ -629,10 +629,20 @@
 
     <!-- SETTINGS PANEL -->
     <div id="panel-settings" class="admin-panel">
-      <div class="section-title">Admin Settings</div>
+      <div class="section-title">Export & Import</div>
+      <div class="card">
+        <p style="font-size:13px; color: var(--text-dim); margin-bottom:16px;">Export saves all your products, talk tracks, and objections to a <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px;">.json</code> file. Import loads it back in — use this to share content with your team or restore after a browser reset.</p>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="exportData()">⬇ Export Content</button>
+          <button class="btn-secondary" onclick="document.getElementById('importFile').click()">⬆ Import Content</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section-title">Admin Password</div>
       <div class="card">
         <div class="form-group">
-          <label>Change Admin Password</label>
+          <label>New Password</label>
           <input type="password" id="newPass1" placeholder="New password">
         </div>
         <div class="form-group">
@@ -655,48 +665,61 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STORAGE ──────────────────────────────────────────────
-const STORE_KEY = 'yuja_sdr_data';
-const PASS_KEY  = 'yuja_sdr_pass';
+// ── SUPABASE CONFIG ───────────────────────────────────────
+const SUPABASE_URL = 'https://wvwcxmqyygtzxdnpfogu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_MFYGEU5tFKCZ23j7c3RARQ_5Rk2cSEs';
+const PASS_KEY = 'yuja_sdr_pass';
 let isAdmin = false;
+let data = { products: [], tracks: [], objections: [] };
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultData(); }
-  catch { return defaultData(); }
-}
-function saveData(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
-function getPass()   { return localStorage.getItem(PASS_KEY) || 'yuja2024'; }
-function setPass(p)  { localStorage.setItem(PASS_KEY, p); }
-
-function defaultData() {
-  return {
-    products: [
-      { id: 'p1', name: 'YuJa Video Platform' },
-      { id: 'p2', name: 'YuJa Enterprise Media' }
-    ],
-    tracks: [
-      { id: 't1', productId: 'p1', title: 'Cold Open — Decision Maker', body: 'Hi [First Name], this is [Your Name] calling from YuJa.\n\nWe work with universities and colleges to replace aging video platforms — things like Kaltura, Panopto — typically saving teams significant cost while giving instructors better tools.\n\nI know I\'m catching you cold, but I\'d love to earn 15 minutes to show you what we\'re doing for schools like [Similar School].\n\nDoes [Day] or [Day] next week work?' },
-    ],
-    objections: [
-      { id: 'o1', productId: 'p1', text: 'We\'re happy with what we have.', response: 'That\'s exactly what most of our current customers said before switching. The question isn\'t whether your current tool works — it\'s whether you\'re overpaying for it. Can I show you a 15-minute comparison? No commitment.' },
-      { id: 'o2', productId: 'p1', text: 'We\'re not in budget right now.', response: 'Totally understand. Most of the schools we work with didn\'t budget for us either — they found room because we actually reduced what they were already spending.\n\nI\'m not asking for a purchase today. Would a quick call to see if the numbers even make sense be worth 15 minutes?' },
-      { id: 'o3', productId: 'p1', text: 'Send me an email.', response: 'Happy to — and I will. But I find emails rarely do it justice. What I\'d rather do is take 15 minutes to walk you through exactly what schools like yours are seeing.\n\nIf it\'s not relevant, I\'ll leave you alone. Does [Day] or [Day] work?' },
-      { id: 'o4', productId: 'p1', text: 'We just signed a contract.', response: 'That\'s helpful to know — I appreciate you telling me. When does that renewal come up? I\'d rather be one of the first calls you make at that point, not the last.' },
-      { id: 'o5', productId: 'p1', text: 'I\'m not the right person.', response: 'No problem — who would be the best person to connect with on something like your media platform or lecture capture? I want to make sure I\'m not wasting anyone\'s time.' },
-    ]
-  };
+async function db(table, method = 'GET', body = null, filter = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    },
+    body: body ? JSON.stringify(body) : null
+  });
+  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  if (method === 'DELETE' || res.status === 204) return null;
+  return res.json();
 }
 
-let data = loadData();
+async function loadData() {
+  try {
+    const [products, tracks, objections] = await Promise.all([
+      db('products', 'GET', null, '?order=sort_order'),
+      db('tracks',   'GET', null, '?order=sort_order'),
+      db('objections','GET', null, '?order=sort_order')
+    ]);
+    data.products   = products.map(p => ({ id: p.id, name: p.name }));
+    data.tracks     = tracks.map(t => ({ id: t.id, productId: t.product_id, title: t.title, body: t.body }));
+    data.objections = objections.map(o => ({ id: o.id, productId: o.product_id, text: o.text, response: o.response }));
+  } catch(e) {
+    console.error('Failed to load data:', e);
+    toast('Could not connect to database');
+  }
+}
 
-// ── UTILS ────────────────────────────────────────────────
+// ── UTILS ─────────────────────────────────────────────────
 function uid() { return '_' + Math.random().toString(36).slice(2,9); }
+function getPass() { return localStorage.getItem(PASS_KEY) || 'yuja2024'; }
+function setPass(p) { localStorage.setItem(PASS_KEY, p); }
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function showView(v) {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.getElementById('view-' + v).classList.add('active');
@@ -713,7 +736,7 @@ function showView(v) {
   }
 }
 
-// ── AUTH ─────────────────────────────────────────────────
+// ── AUTH ──────────────────────────────────────────────────
 function handleAdminNav() {
   if (isAdmin) { showView('admin'); renderAdmin(); return; }
   showView('login');
@@ -741,15 +764,20 @@ function changePassword() {
   document.getElementById('newPass2').value = '';
   toast('Password updated');
 }
-function resetAll() {
+async function resetAll() {
   if (!confirm('Delete everything? This cannot be undone.')) return;
-  data = defaultData();
-  saveData(data);
-  renderAdmin();
-  toast('Data reset to defaults');
+  try {
+    await db('objections', 'DELETE', null, '?id=neq.none');
+    await db('tracks',     'DELETE', null, '?id=neq.none');
+    await db('products',   'DELETE', null, '?id=neq.none');
+    await loadData();
+    renderAdmin();
+    renderSDR();
+    toast('All data deleted');
+  } catch(e) { toast('Error resetting data'); }
 }
 
-// ── SDR RENDER ───────────────────────────────────────────
+// ── SDR RENDER ────────────────────────────────────────────
 function renderSDR() {
   const sel = document.getElementById('productSelector');
   const content = document.getElementById('sdrContent');
@@ -760,33 +788,25 @@ function renderSDR() {
     return;
   }
 
-  let activePid = data.products[0].id;
-
   function renderProduct(pid) {
-    activePid = pid;
     sel.querySelectorAll('.product-tab').forEach(b => {
       b.classList.toggle('active', b.dataset.pid === pid);
     });
-
     const tracks = data.tracks.filter(t => t.productId === pid);
     const objs   = data.objections.filter(o => o.productId === pid);
-
     let html = '';
-
     if (tracks.length) {
       tracks.forEach(t => {
-        html += `<div class="section-label" style="margin-bottom:10px">${t.title}</div>
+        html += `<div class="section-label" style="margin-bottom:10px">${escHtml(t.title)}</div>
         <div class="track-card"><div class="track-text">${escHtml(t.body)}</div></div>`;
       });
     } else {
       html += `<div class="track-card"><div class="track-text" style="color:var(--text-muted)">No talk track configured for this product yet.</div></div>`;
     }
-
     html += `<div class="objections-header">
       <div class="objections-label">Objection Handlers</div>
       <div class="pill-count">${objs.length}</div>
     </div>`;
-
     if (objs.length) {
       html += `<div class="objections-grid">`;
       objs.forEach(o => {
@@ -802,7 +822,6 @@ function renderSDR() {
     } else {
       html += `<div class="empty-state" style="padding:30px 0">No objections configured for this product.</div>`;
     }
-
     content.innerHTML = html;
   }
 
@@ -822,22 +841,12 @@ function toggleObj(oid) {
   const btn  = document.querySelector(`.obj-btn[data-oid="${oid}"]`);
   const resp = document.getElementById('resp-' + oid);
   const isOpen = btn.classList.contains('active');
-
-  // close all
   document.querySelectorAll('.obj-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.obj-response').forEach(r => r.classList.remove('active'));
-
-  if (!isOpen) {
-    btn.classList.add('active');
-    resp.classList.add('active');
-  }
+  if (!isOpen) { btn.classList.add('active'); resp.classList.add('active'); }
 }
 
-function escHtml(str) {
-  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── ADMIN RENDER ─────────────────────────────────────────
+// ── ADMIN RENDER ──────────────────────────────────────────
 function renderAdmin() {
   renderProductList();
   populateSelects();
@@ -856,7 +865,7 @@ function switchAdminTab(tab) {
 function populateSelects() {
   ['trackProductFilter','trackProduct','objProductFilter','objProduct'].forEach(id => {
     const el = document.getElementById(id);
-    el.innerHTML = data.products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    el.innerHTML = data.products.map(p => `<option value="${p.id}">${escHtml(p.name)}</option>`).join('');
   });
 }
 
@@ -875,29 +884,30 @@ function renderProductList() {
       </div>
     </div>`).join('');
 }
-function addProduct() {
+async function addProduct() {
   const name = document.getElementById('newProductName').value.trim();
   if (!name) return toast('Enter a product name');
-  data.products.push({ id: uid(), name });
-  document.getElementById('newProductName').value = '';
-  saveData(data);
-  renderProductList();
-  populateSelects();
-  renderTrackList();
-  renderObjList();
-  toast('Product added');
+  const id = uid();
+  try {
+    await db('products', 'POST', { id, name, sort_order: data.products.length });
+    document.getElementById('newProductName').value = '';
+    await loadData();
+    renderProductList();
+    populateSelects();
+    toast('Product added');
+  } catch(e) { toast('Error adding product'); }
 }
-function deleteProduct(pid) {
+async function deleteProduct(pid) {
   if (!confirm('Delete this product and all its content?')) return;
-  data.products = data.products.filter(p => p.id !== pid);
-  data.tracks = data.tracks.filter(t => t.productId !== pid);
-  data.objections = data.objections.filter(o => o.productId !== pid);
-  saveData(data);
-  renderProductList();
-  populateSelects();
-  renderTrackList();
-  renderObjList();
-  toast('Product deleted');
+  try {
+    await db('objections', 'DELETE', null, `?product_id=eq.${pid}`);
+    await db('tracks',     'DELETE', null, `?product_id=eq.${pid}`);
+    await db('products',   'DELETE', null, `?id=eq.${pid}`);
+    await loadData();
+    renderAdmin();
+    renderSDR();
+    toast('Product deleted');
+  } catch(e) { toast('Error deleting product'); }
 }
 
 // TRACKS
@@ -920,22 +930,24 @@ function renderTrackList() {
       </div>
     </div>`).join('');
 }
-function saveTrack() {
+async function saveTrack() {
   const pid   = document.getElementById('trackProduct').value;
   const title = document.getElementById('trackTitle').value.trim();
   const body  = document.getElementById('trackBody').value.trim();
   const eid   = document.getElementById('trackEditId').value;
   if (!title || !body) return toast('Fill in all fields');
-  if (eid) {
-    const t = data.tracks.find(t => t.id === eid);
-    if (t) { t.productId = pid; t.title = title; t.body = body; }
-  } else {
-    data.tracks.push({ id: uid(), productId: pid, title, body });
-  }
-  saveData(data);
-  clearTrackForm();
-  renderTrackList();
-  toast('Talk track saved');
+  try {
+    if (eid) {
+      await db('tracks', 'PATCH', { product_id: pid, title, body }, `?id=eq.${eid}`);
+    } else {
+      await db('tracks', 'POST', { id: uid(), product_id: pid, title, body, sort_order: data.tracks.length });
+    }
+    await loadData();
+    clearTrackForm();
+    renderTrackList();
+    renderSDR();
+    toast('Talk track saved');
+  } catch(e) { toast('Error saving talk track'); }
 }
 function editTrack(tid) {
   const t = data.tracks.find(t => t.id === tid);
@@ -952,12 +964,15 @@ function clearTrackForm() {
   document.getElementById('trackEditId').value = '';
   document.querySelector('#panel-tracks .inline-form .form-title').textContent = '+ Add / Edit Talk Track';
 }
-function deleteTrack(tid) {
+async function deleteTrack(tid) {
   if (!confirm('Delete this talk track?')) return;
-  data.tracks = data.tracks.filter(t => t.id !== tid);
-  saveData(data);
-  renderTrackList();
-  toast('Deleted');
+  try {
+    await db('tracks', 'DELETE', null, `?id=eq.${tid}`);
+    await loadData();
+    renderTrackList();
+    renderSDR();
+    toast('Deleted');
+  } catch(e) { toast('Error deleting track'); }
 }
 
 // OBJECTIONS
@@ -980,22 +995,24 @@ function renderObjList() {
       </div>
     </div>`).join('');
 }
-function saveObj() {
+async function saveObj() {
   const pid  = document.getElementById('objProduct').value;
   const text = document.getElementById('objText').value.trim();
   const resp = document.getElementById('objResponse').value.trim();
   const eid  = document.getElementById('objEditId').value;
   if (!text || !resp) return toast('Fill in all fields');
-  if (eid) {
-    const o = data.objections.find(o => o.id === eid);
-    if (o) { o.productId = pid; o.text = text; o.response = resp; }
-  } else {
-    data.objections.push({ id: uid(), productId: pid, text, response: resp });
-  }
-  saveData(data);
-  clearObjForm();
-  renderObjList();
-  toast('Objection saved');
+  try {
+    if (eid) {
+      await db('objections', 'PATCH', { product_id: pid, text, response: resp }, `?id=eq.${eid}`);
+    } else {
+      await db('objections', 'POST', { id: uid(), product_id: pid, text, response: resp, sort_order: data.objections.length });
+    }
+    await loadData();
+    clearObjForm();
+    renderObjList();
+    renderSDR();
+    toast('Objection saved');
+  } catch(e) { toast('Error saving objection'); }
 }
 function editObj(oid) {
   const o = data.objections.find(o => o.id === oid);
@@ -1012,17 +1029,21 @@ function clearObjForm() {
   document.getElementById('objEditId').value   = '';
   document.querySelector('#panel-objections .inline-form .form-title').textContent = '+ Add / Edit Objection';
 }
-function deleteObj(oid) {
+async function deleteObj(oid) {
   if (!confirm('Delete this objection?')) return;
-  data.objections = data.objections.filter(o => o.id !== oid);
-  saveData(data);
-  renderObjList();
-  toast('Deleted');
+  try {
+    await db('objections', 'DELETE', null, `?id=eq.${oid}`);
+    await loadData();
+    renderObjList();
+    renderSDR();
+    toast('Deleted');
+  } catch(e) { toast('Error deleting objection'); }
 }
 
-// ── INIT ─────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────
 document.querySelector('[onclick="showView(\'sdr\')"]').style.display = 'none';
-renderSDR();
+document.getElementById('sdrContent').innerHTML = '<div class="empty-state">Loading...</div>';
+loadData().then(() => renderSDR());
 </script>
 </body>
 </html>
