@@ -648,6 +648,136 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
+
+  /* ── CUSTOMER REFERENCES PANEL ── */
+  .ref-toggle-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #d1d5db;
+    padding: 5px 13px;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .ref-toggle-btn:hover { border-color: var(--accent-on-dark); color: var(--accent-on-dark); }
+  .ref-toggle-btn.active { background: rgba(78,186,99,0.15); border-color: var(--accent-on-dark); color: var(--accent-on-dark); }
+
+  .ref-panel {
+    display: none;
+    background: #f8faf8;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px 18px;
+    animation: slideDown 0.18s ease;
+  }
+  .ref-panel.open { display: block; }
+
+  .ref-panel-inner {
+    max-width: 820px;
+  }
+
+  .ref-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .ref-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .ref-state-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    min-width: 160px;
+  }
+  .ref-state-select:focus { border-color: var(--accent); }
+
+  .ref-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .ref-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    animation: slideDown 0.15s ease;
+  }
+
+  .ref-card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  .ref-card-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: var(--sans);
+  }
+
+  .ref-card-state {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .ref-no-results {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 8px 0;
+  }
+
+  .ref-count-badge {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -670,6 +800,20 @@
   <!-- Product bar -->
   <div class="product-bar" id="productBar">
     <div class="empty-state" style="padding:0;color:#6b7280;font-size:12px;font-family:var(--mono)">Loading…</div>
+  </div>
+
+  <!-- Customer References slide-down panel -->
+  <div class="ref-panel" id="refPanel">
+    <div class="ref-panel-inner">
+      <div class="ref-row">
+        <span class="ref-label">Customers in</span>
+        <select class="ref-state-select" id="refStateSelect" onchange="renderRefResults()">
+          <option value="">— pick a state —</option>
+        </select>
+        <span class="ref-count-badge" id="refCountBadge" style="display:none"></span>
+      </div>
+      <div class="ref-results" id="refResults"></div>
+    </div>
   </div>
 
   <!-- Two-column body -->
@@ -840,6 +984,20 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── CUSTOMER REFERENCES DATA ──────────────────────────────
+const CUSTOMERS = [
+  { name: 'Angelo State University',            state: 'Texas',        products: ['Lumina'] },
+  { name: 'Chattahoochee Technical College',    state: 'Georgia',      products: ['Lumina'] },
+  { name: 'Southeastern Louisiana University',  state: 'Louisiana',    products: ['Lumina', 'Panorama'] },
+  { name: 'Southeastern Oklahoma State University', state: 'Oklahoma', products: ['Lumina', 'Panorama'] },
+  { name: 'SUNY Broome Community College',      state: 'New York',     products: ['Lumina'] },
+  { name: 'University of Maryland Eastern Shore', state: 'Maryland',   products: ['Lumina'] },
+  { name: 'El Paso Community College',          state: 'Texas',        products: ['Lumina'] },
+  { name: 'Northshore Technical Community College', state: 'Louisiana', products: ['Panorama'] },
+  { name: 'South Louisiana Community College', state: 'Louisiana',     products: ['Panorama'] },
+  { name: 'Saint Francis University',           state: 'Pennsylvania', products: ['Lumina', 'Panorama'] },
+];
+
 // ── SUPABASE ──────────────────────────────────────────────
 const SUPABASE_URL = 'https://wvwcxmqyygtzxdnpfogu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_MFYGEU5tFKCZ23j7c3RARQ_5Rk2cSEs';
@@ -982,10 +1140,84 @@ function renderSDR() {
     bar.appendChild(btn);
   });
 
+  // Customer references toggle button (right-aligned)
+  const refBtn = document.createElement('button');
+  refBtn.className = 'ref-toggle-btn';
+  refBtn.id        = 'refToggleBtn';
+  refBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Customers';
+  refBtn.onclick   = toggleRefPanel;
+  bar.appendChild(refBtn);
+
   // Show first product
   activePid = data.products[0].id;
   renderTrackPanel(activePid);
   renderObjPanel(activePid);
+  populateRefStates();
+}
+
+function toggleRefPanel() {
+  const panel = document.getElementById('refPanel');
+  const btn   = document.getElementById('refToggleBtn');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+  if (!isOpen) {
+    document.getElementById('refStateSelect').value = '';
+    document.getElementById('refResults').innerHTML = '';
+    document.getElementById('refCountBadge').style.display = 'none';
+  }
+}
+
+function populateRefStates() {
+  const select = document.getElementById('refStateSelect');
+  // Keep only the placeholder, then rebuild
+  select.innerHTML = '<option value="">— pick a state —</option>';
+  const states = [...new Set(CUSTOMERS.map(c => c.state))].sort();
+  states.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    select.appendChild(opt);
+  });
+}
+
+function renderRefResults() {
+  const state    = document.getElementById('refStateSelect').value;
+  const resultsEl = document.getElementById('refResults');
+  const badge    = document.getElementById('refCountBadge');
+
+  if (!state) {
+    resultsEl.innerHTML = '';
+    badge.style.display = 'none';
+    return;
+  }
+
+  // Get active product name to match against customer product tags
+  const activeProduct = data.products.find(p => p.id === activePid);
+  const productName   = activeProduct ? activeProduct.name : '';
+
+  // Filter: must match state, and product name must contain one of the customer's product tags
+  const matches = CUSTOMERS.filter(c => {
+    if (c.state !== state) return false;
+    return c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase()));
+  });
+
+  badge.textContent    = matches.length + (matches.length === 1 ? ' customer' : ' customers');
+  badge.style.display  = matches.length ? 'inline-block' : 'none';
+
+  if (!matches.length) {
+    resultsEl.innerHTML = '<div class="ref-no-results">No known customers in ' + escHtml(state) + ' for this product.</div>';
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(c => `
+    <div class="ref-card">
+      <div class="ref-card-icon">🎓</div>
+      <div>
+        <div class="ref-card-name">${escHtml(c.name)}</div>
+        <div class="ref-card-state">${escHtml(c.state)}</div>
+      </div>
+    </div>`).join('');
 }
 
 function switchProduct(pid) {
@@ -996,6 +1228,10 @@ function switchProduct(pid) {
   document.getElementById('objSearch').value = '';
   renderTrackPanel(pid);
   renderObjPanel(pid);
+  // Re-run ref results if panel is open so results update for new product
+  if (document.getElementById('refPanel').classList.contains('open')) {
+    renderRefResults();
+  }
 }
 
 // ── Left panel: talk tracks ────────────────
