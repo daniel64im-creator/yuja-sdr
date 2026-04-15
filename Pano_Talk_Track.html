@@ -255,6 +255,36 @@
   }
   .track-text .hl { color: var(--accent); font-weight: 600; }
 
+  /* ── PANEL MODE TOGGLE ── */
+  .panel-mode-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .panel-mode-tab {
+    flex: 1;
+    padding: 11px 10px;
+    background: none;
+    border: none;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .panel-mode-tab:hover { color: var(--text); background: var(--surface2); }
+  .panel-mode-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
   /* ── RIGHT: Objections panel ── */
   .obj-panel {
     grid-column: 2;
@@ -707,18 +737,19 @@
     white-space: nowrap;
   }
 
+  .ref-state-wrap { margin-top: 4px; }
   .ref-state-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    width: 100%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    padding: 6px 12px;
+    padding: 9px 12px;
     color: var(--text);
     font-family: var(--sans);
-    font-size: 13px;
+    font-size: 13.5px;
     outline: none;
     cursor: pointer;
     transition: border-color 0.15s;
-    min-width: 160px;
   }
   .ref-state-select:focus { border-color: var(--accent); }
 
@@ -809,20 +840,6 @@
     <div class="empty-state" style="padding:0;color:#6b7280;font-size:12px;font-family:var(--mono)">Loading…</div>
   </div>
 
-  <!-- Customer References slide-down panel -->
-  <div class="ref-panel" id="refPanel">
-    <div class="ref-panel-inner">
-      <div class="ref-row">
-        <span class="ref-label">Customers in</span>
-        <select class="ref-state-select" id="refStateSelect" onchange="renderRefResults()">
-          <option value="">— pick a state —</option>
-        </select>
-        <span class="ref-count-badge" id="refCountBadge" style="display:none"></span>
-      </div>
-      <div class="ref-results" id="refResults"></div>
-    </div>
-  </div>
-
   <!-- Two-column body -->
   <div class="sdr-body">
 
@@ -831,23 +848,52 @@
       <div class="empty-state">Loading…</div>
     </div>
 
-    <!-- RIGHT: Objections -->
+    <!-- RIGHT: Panel (Objections or Customer References) -->
     <div class="obj-panel">
-      <div class="obj-panel-head">
-        <div class="obj-panel-title">
-          <span>Objection Handlers</span>
-          <span class="obj-count-pill" id="objCount">0</span>
+
+      <!-- Mode toggle -->
+      <div class="panel-mode-tabs">
+        <button class="panel-mode-tab active" id="modeTabObj" onclick="switchPanelMode('objections')">Objection Handlers</button>
+        <button class="panel-mode-tab" id="modeTabRef" onclick="switchPanelMode('references')">Customer References</button>
+      </div>
+
+      <!-- OBJECTIONS MODE -->
+      <div id="modeObj" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <div class="obj-panel-head">
+          <div class="obj-panel-title">
+            <span>Objection Handlers</span>
+            <span class="obj-count-pill" id="objCount">0</span>
+          </div>
+          <div class="obj-search-wrap">
+            <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#4a6080" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="obj-search" id="objSearch" type="text" placeholder="Search objections…" oninput="filterObjs()" style="padding-left:40px">
+          </div>
         </div>
-        <div class="obj-search-wrap">
-          <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#4a5568" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input class="obj-search" id="objSearch" type="text" placeholder="Search objections…" oninput="filterObjs()" style="padding-left:40px">
+        <div class="obj-list" id="objList">
+          <div class="empty-state">Loading…</div>
         </div>
       </div>
-      <div class="obj-list" id="objList">
-        <div class="empty-state">Loading…</div>
+
+      <!-- CUSTOMER REFERENCES MODE -->
+      <div id="modeRef" style="display:none; display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div class="obj-panel-head">
+          <div class="obj-panel-title">
+            <span>Customer References</span>
+            <span class="obj-count-pill" id="refCountPill" style="display:none"></span>
+          </div>
+          <div class="ref-state-wrap">
+            <select class="ref-state-select" id="refStateSelect" onchange="renderRefResults()">
+              <option value="">— pick a state —</option>
+            </select>
+          </div>
+        </div>
+        <div class="obj-list" id="refResultsList">
+          <div class="empty-state" style="padding:32px 12px;font-size:11px">Pick a state to see customers.</div>
+        </div>
       </div>
+
     </div>
 
   </div>
@@ -1147,14 +1193,6 @@ function renderSDR() {
     bar.appendChild(btn);
   });
 
-  // Customer references toggle button (right-aligned)
-  const refBtn = document.createElement('button');
-  refBtn.className = 'ref-toggle-btn';
-  refBtn.id        = 'refToggleBtn';
-  refBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Customers';
-  refBtn.onclick   = toggleRefPanel;
-  bar.appendChild(refBtn);
-
   // Show first product
   activePid = data.products[0].id;
   renderTrackPanel(activePid);
@@ -1162,17 +1200,19 @@ function renderSDR() {
   populateRefStates();
 }
 
-function toggleRefPanel() {
-  const panel = document.getElementById('refPanel');
-  const btn   = document.getElementById('refToggleBtn');
-  const isOpen = panel.classList.contains('open');
-  panel.classList.toggle('open', !isOpen);
-  btn.classList.toggle('active', !isOpen);
-  if (!isOpen) {
-    document.getElementById('refStateSelect').value = '';
-    document.getElementById('refResults').innerHTML = '';
-    document.getElementById('refCountBadge').style.display = 'none';
-  }
+function switchPanelMode(mode) {
+  const isObj = mode === 'objections';
+  document.getElementById('modeObj').style.display = isObj ? 'flex' : 'none';
+  document.getElementById('modeObj').style.flexDirection = 'column';
+  document.getElementById('modeObj').style.flex = '1';
+  document.getElementById('modeObj').style.overflow = 'hidden';
+  document.getElementById('modeRef').style.display = isObj ? 'none' : 'flex';
+  document.getElementById('modeRef').style.flexDirection = 'column';
+  document.getElementById('modeRef').style.flex = '1';
+  document.getElementById('modeRef').style.overflow = 'hidden';
+  document.getElementById('modeTabObj').classList.toggle('active', isObj);
+  document.getElementById('modeTabRef').classList.toggle('active', !isObj);
+  if (!isObj) populateRefStates();
 }
 
 function populateRefStates() {
@@ -1201,13 +1241,13 @@ function populateRefStates() {
 }
 
 function renderRefResults() {
-  const state    = document.getElementById('refStateSelect').value;
-  const resultsEl = document.getElementById('refResults');
-  const badge    = document.getElementById('refCountBadge');
+  const state     = document.getElementById('refStateSelect').value;
+  const resultsEl = document.getElementById('refResultsList');
+  const pill      = document.getElementById('refCountPill');
 
   if (!state) {
-    resultsEl.innerHTML = '';
-    badge.style.display = 'none';
+    resultsEl.innerHTML = '<div class="empty-state" style="padding:32px 12px;font-size:11px">Pick a state to see customers.</div>';
+    pill.style.display = 'none';
     return;
   }
 
@@ -1219,11 +1259,11 @@ function renderRefResults() {
     c.products.some(tag => productName.toLowerCase().includes(tag.toLowerCase()))
   );
 
-  badge.textContent   = matches.length + (matches.length === 1 ? ' customer' : ' customers');
-  badge.style.display = matches.length ? 'inline-block' : 'none';
+  pill.textContent   = matches.length;
+  pill.style.display = matches.length ? 'inline-block' : 'none';
 
   if (!matches.length) {
-    resultsEl.innerHTML = '<div class="ref-no-results">No known customers in ' + escHtml(state) + ' for this product.</div>';
+    resultsEl.innerHTML = '<div class="ref-no-results" style="padding:16px">No known customers in ' + escHtml(state) + ' for this product.</div>';
     return;
   }
 
@@ -1245,8 +1285,8 @@ function switchProduct(pid) {
   document.getElementById('objSearch').value = '';
   renderTrackPanel(pid);
   renderObjPanel(pid);
-  // Re-run ref panel if open so dropdown and results update for new product
-  if (document.getElementById('refPanel').classList.contains('open')) {
+  // Refresh ref panel if it's the active mode
+  if (document.getElementById('modeTabRef').classList.contains('active')) {
     populateRefStates();
     document.getElementById('refStateSelect').value = '';
     renderRefResults();
