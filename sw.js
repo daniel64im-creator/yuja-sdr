@@ -1,11 +1,11 @@
 const CACHE = 'yuja-sdr-v3';
 const STATIC = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/yuja_logo_final.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './yuja_logo_final.png'
 ];
 
 // Install: cache static assets
