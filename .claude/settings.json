@@ -1,21 +1,8 @@
 {
   "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$env:GCM_INTERACTIVE = 'never'; $env:GIT_TERMINAL_PROMPT = '0'; Set-Location 'c:\\Users\\Danny Im\\Desktop\\yuja-sdr'; $status = git status --porcelain; if ($status) { git add -A; git commit -m 'Auto-save changes'; git push origin main }",
-            "shell": "powershell",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
+    "Stop": []
   },
   "permissions": {
-    "allow": [
-      "Bash(curl -s \"https://wvwcxmqyygtzxdnpfogu.supabase.co/rest/v1/tracks?select=title,body&product_id=eq._nbsjgfl&order=sort_order\" -H \"apikey: sb_publishable_MFYGEU5tFKCZ23j7c3RARQ_5Rk2cSEs\" -H \"Authorization: Bearer sb_publishable_MFYGEU5tFKCZ23j7c3RARQ_5Rk2cSEs\")"
-    ]
+    "allow": []
   }
 }
